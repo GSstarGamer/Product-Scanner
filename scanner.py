@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 import pytesseract
 
-OPENAI_API_KEY = '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'
+OPENAI_API_KEY = 'YOUR_OPENAI_APIKEY'
 
 
 pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
