@@ -7,11 +7,13 @@ import pytesseract
 
 OPENAI_API_KEY = 'YOUR_OPENAI_APIKEY'
 
-
+# change depending on OS
+# https://ironsoftware.com/csharp/ocr/blog/ocr-tools/tesseract-ocr-windows/#:~:text=To%20test%20that%20Tesseract%20OCR,explanation%20of%20Tesseract's%20usage%20options.&text=Congratulations!,for%20Windows%20on%20your%20machine.
+# ^ to find where your tesseract is
 pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
 
-def getText(byte_data, apply_filter=False):
+def getText(byte_data, apply_filter=False):  # ocr
     image = cv2.imdecode(np.frombuffer(byte_data, np.uint8), cv2.IMREAD_COLOR)
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -31,7 +33,7 @@ def getText(byte_data, apply_filter=False):
     return text, filtered_image
 
 
-def netify(data, indent=0):
+def netify(data, indent=0):  # shows english data
     result = ""
     indent_str = " " * indent
     if isinstance(data, dict):
@@ -64,20 +66,19 @@ IngrListprompt = '''i will give an ingredient list (python) on chat (['ingredien
     ]
 }
 
-and your first list is: 
+and your first list is:
 '''
 
 
-async def main(image_path, apply_filter=False):
+async def main(image_path, apply_filter=False) -> str:
     async with ClientSession() as session:
         llm_client = OpenAIClient(LLMAPIClientConfig(
             OPENAI_API_KEY, session, default_model="text-davinci-003"))
 
-        text, image = getText(image_path, apply_filter)
+        text = getText(image_path, apply_filter)
 
         if not text:
-            return None
-            # raise Exception('No ingredients text found, or unclear')
+            raise ValueError('No ingredients text found, or unclear')
 
         x = await llm_client.text_completion('what ever is in ``` you must list down the ingredients given in the ingredients section (ingredients:) separated with commas and without a fullstop\n```'+text+'```\n')
         ingredientList = x[0].split(', ')
